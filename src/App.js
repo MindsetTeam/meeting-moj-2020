@@ -45,6 +45,7 @@ export class App extends React.Component {
     this.dateRef = React.createRef();
     this.timeRef = React.createRef();
     this.marqueeRef = React.createRef();
+    this.meetingRef = React.createRef();
     this.state = {
       loading: true,
     };
@@ -80,6 +81,28 @@ export class App extends React.Component {
       this.dateRef.current.textContent = `ថ្ងៃ${day} ទី${date}​ ខែ${month} ឆ្នាំ${year}`;
       this.timeRef.current.textContent = time;
     }, 500);
+
+    if (this.meetingRef.current.children.length > 5) {
+      setInterval(() => {
+        let firstElement = this.meetingRef.current.firstElementChild;
+        this.meetingRef.current.children[1].classList.add("animatedDiv");
+        this.meetingRef.current.firstElementChild.remove();
+
+        if (firstElement.classList.contains("animatedDiv")) {
+          firstElement.className = "meeting";
+        }
+        this.meetingRef.current.insertAdjacentElement(
+          "beforeend",
+          firstElement
+        );
+      }, 3000);
+    } else {
+      let firstElement = this.meetingRef.current.firstElementChild;
+      if (firstElement) {
+        firstElement.classList.remove("animatedDiv");
+        firstElement.style.marginTop = "0px";
+      }
+    }
   }
 
   toggleFullscreen = (e) => {
@@ -151,7 +174,275 @@ export class App extends React.Component {
 
             {/* Content Body */}
 
-            <div className="content-body"></div>
+            <div className="content-body" ref={this.meetingRef}>
+              <div className="meeting animatedDiv">
+                {/* Date Time */}
+                <div className="datetime">
+                  <div className="date">
+                    <p>០៩-កញ្ញា-២០២០</p>
+                  </div>
+                  <div className="time">
+                    <p>០៧:០០ ព្រឹក</p>
+                  </div>
+                </div>
+                {/* Title */}
+                <div className="title-container">
+                  <div className="title">
+                    <p>
+                      {" "}
+                      <span style={{ fontWeight: "bolder" }}>
+                        កម្មវត្ថុ៖
+                      </span>{" "}
+                      កិច្ចប្រជុំក្រុមការងាររាជរដ្ឋាភិបាល ពិនិត្យលើសំណើ
+                      របស់សង្គមស៊ីវិល
+                      ស្នើសុំធ្វើវិសោធនកម្មច្បាប់ស្តីពីសមាគមនិងអង្គការមិនមែនរដ្ឋាភិបាល
+                    </p>
+                  </div>
+                  <div className="info">
+                    <p>
+                      <span style={{ fontWeight: "bolder" }}>ដឹកនាំដោយ៖</span>{" "}
+                      <span>ឯកឧត្តម ជិន ម៉ាលីន</span>{" "}
+                      <span>
+                        រដ្ឋលេខាធិការ និងជាអ្នកនាំពាក្យក្រសួងយុត្តិធម៌
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Location */}
+                <div className="location">
+                  <p>ទីស្តីការក្រសួង (បន្ទប់ ក)</p>
+                </div>
+
+                {/* Status */}
+                <div className="status">
+                  <p className="blink">​ កំពុងដំណើរការ</p>
+                </div>
+              </div>
+
+              <div className="meeting">
+                {/* Date Time */}
+                <div className="datetime">
+                  <div className="date">
+                    <p>០៩-កញ្ញា-២០២០</p>
+                  </div>
+                  <div className="time">
+                    <p>០៧:០០ ព្រឹក</p>
+                  </div>
+                </div>
+                {/* Title */}
+                <div className="title-container">
+                  <div className="title">
+                    <p>
+                      {" "}
+                      <span style={{ fontWeight: "bolder" }}>
+                        កម្មវត្ថុ៖
+                      </span>{" "}
+                      កិច្ចប្រជុំក្រុមការងាររាជរដ្ឋាភិបាល ពិនិត្យលើសំណើ
+                      របស់សង្គមស៊ីវិល
+                      ស្នើសុំធ្វើវិសោធនកម្មច្បាប់ស្តីពីសមាគមនិងអង្គការមិនមែនរដ្ឋាភិបាល
+                    </p>
+                  </div>
+                  <div className="info">
+                    <p>
+                      <span style={{ fontWeight: "bolder" }}>ដឹកនាំដោយ៖</span>{" "}
+                      <span>ឯកឧត្តម ជិន ម៉ាលីន</span>{" "}
+                      <span>
+                        រដ្ឋលេខាធិការ និងជាអ្នកនាំពាក្យក្រសួងយុត្តិធម៌
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Location */}
+                <div className="location">
+                  <p>ទីស្តីការក្រសួង (បន្ទប់ ក)</p>
+                </div>
+
+                {/* Status */}
+                <div className="status">
+                  <p className="blink">​ កំពុងដំណើរការ</p>
+                </div>
+              </div>
+
+              <div className="meeting">
+                {/* Date Time */}
+                <div className="datetime">
+                  <div className="date">
+                    <p>០៩-កញ្ញា-២០២០</p>
+                  </div>
+                  <div className="time">
+                    <p>០៧:០០ ព្រឹក</p>
+                  </div>
+                </div>
+                {/* Title */}
+                <div className="title-container">
+                  <div className="title">
+                    <p>
+                      {" "}
+                      <span style={{ fontWeight: "bolder" }}>
+                        កម្មវត្ថុ៖
+                      </span>{" "}
+                      កិច្ចប្រជុំក្រុមការងាររាជរដ្ឋាភិបាល ពិនិត្យលើសំណើ
+                      របស់សង្គមស៊ីវិល
+                      ស្នើសុំធ្វើវិសោធនកម្មច្បាប់ស្តីពីសមាគមនិងអង្គការមិនមែនរដ្ឋាភិបាល
+                    </p>
+                  </div>
+                  <div className="info">
+                    <p>
+                      <span style={{ fontWeight: "bolder" }}>ដឹកនាំដោយ៖</span>{" "}
+                      <span>ឯកឧត្តម ជិន ម៉ាលីន</span>{" "}
+                      <span>
+                        រដ្ឋលេខាធិការ និងជាអ្នកនាំពាក្យក្រសួងយុត្តិធម៌
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Location */}
+                <div className="location">
+                  <p>ទីស្តីការក្រសួង (បន្ទប់ ក)</p>
+                </div>
+
+                {/* Status */}
+                <div className="status">
+                  <p className="blink">​ កំពុងដំណើរការ</p>
+                </div>
+              </div>
+
+              <div className="meeting">
+                {/* Date Time */}
+                <div className="datetime">
+                  <div className="date">
+                    <p>០៩-កញ្ញា-២០២០</p>
+                  </div>
+                  <div className="time">
+                    <p>០៧:០០ ព្រឹក</p>
+                  </div>
+                </div>
+                {/* Title */}
+                <div className="title-container">
+                  <div className="title">
+                    <p>
+                      {" "}
+                      <span style={{ fontWeight: "bolder" }}>
+                        កម្មវត្ថុ៖
+                      </span>{" "}
+                      កិច្ចប្រជុំក្រុមការងាររាជរដ្ឋាភិបាល ពិនិត្យលើសំណើ
+                      របស់សង្គមស៊ីវិល
+                      ស្នើសុំធ្វើវិសោធនកម្មច្បាប់ស្តីពីសមាគមនិងអង្គការមិនមែនរដ្ឋាភិបាល
+                    </p>
+                  </div>
+                  <div className="info">
+                    <p>
+                      <span style={{ fontWeight: "bolder" }}>ដឹកនាំដោយ៖</span>{" "}
+                      <span>ឯកឧត្តម ជិន ម៉ាលីន</span>{" "}
+                      <span>
+                        រដ្ឋលេខាធិការ និងជាអ្នកនាំពាក្យក្រសួងយុត្តិធម៌
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Location */}
+                <div className="location">
+                  <p>ទីស្តីការក្រសួង (បន្ទប់ ក)</p>
+                </div>
+
+                {/* Status */}
+                <div className="status">
+                  <p className="blink">​ កំពុងដំណើរការ</p>
+                </div>
+              </div>
+
+              <div className="meeting">
+                {/* Date Time */}
+                <div className="datetime">
+                  <div className="date">
+                    <p>០៩-កញ្ញា-២០២០</p>
+                  </div>
+                  <div className="time">
+                    <p>០៧:០០ ព្រឹក</p>
+                  </div>
+                </div>
+                {/* Title */}
+                <div className="title-container">
+                  <div className="title">
+                    <p>
+                      {" "}
+                      <span style={{ fontWeight: "bolder" }}>
+                        កម្មវត្ថុ៖
+                      </span>{" "}
+                      កិច្ចប្រជុំក្រុមការងាររាជរដ្ឋាភិបាល ពិនិត្យលើសំណើ
+                      របស់សង្គមស៊ីវិល
+                      ស្នើសុំធ្វើវិសោធនកម្មច្បាប់ស្តីពីសមាគមនិងអង្គការមិនមែនរដ្ឋាភិបាល
+                    </p>
+                  </div>
+                  <div className="info">
+                    <p>
+                      <span style={{ fontWeight: "bolder" }}>ដឹកនាំដោយ៖</span>{" "}
+                      <span>ឯកឧត្តម ជិន ម៉ាលីន</span>{" "}
+                      <span>
+                        រដ្ឋលេខាធិការ និងជាអ្នកនាំពាក្យក្រសួងយុត្តិធម៌
+                      </span>
+                    </p>
+                  </div>
+                </div>
+                {/* Location */}
+                <div className="location">
+                  <p>ទីស្តីការក្រសួង (បន្ទប់ ក)</p>
+                </div>
+
+                {/* Status */}
+                <div className="status">
+                  <p className="blink">​ កំពុងដំណើរការ</p>
+                </div>
+              </div>
+
+              <div className="meeting">
+                {/* Date Time */}
+                <div className="datetime">
+                  <div className="date">
+                    <p>០៩-កញ្ញា-២០២០</p>
+                  </div>
+                  <div className="time">
+                    <p>០៧:០០ ព្រឹក</p>
+                  </div>
+                </div>
+                {/* Title */}
+                <div className="title-container">
+                  <div className="title">
+                    <p>
+                      {" "}
+                      <span style={{ fontWeight: "bolder" }}>
+                        កម្មវត្ថុ៖
+                      </span>{" "}
+                      កិច្ចប្រជុំក្រុមការងាររាជរដ្ឋាភិបាល ពិនិត្យលើសំណើ
+                      របស់សង្គមស៊ីវិល
+                      ស្នើសុំធ្វើវិសោធនកម្មច្បាប់ស្តីពីសមាគមនិងអង្គការមិនមែនរដ្ឋាភិបាល
+                    </p>
+                  </div>
+                  <div className="info">
+                    <p>
+                      <span style={{ fontWeight: "bolder" }}>ដឹកនាំដោយ៖</span>{" "}
+                      <span>ឯកឧត្តម ជិន ម៉ាលីន</span>{" "}
+                      <span>
+                        រដ្ឋលេខាធិការ និងជាអ្នកនាំពាក្យក្រសួងយុត្តិធម៌
+                      </span>
+                    </p>
+                  </div>
+                </div>
+                {/* Location */}
+                <div className="location">
+                  <p>ទីស្តីការក្រសួង (បន្ទប់ ក)</p>
+                </div>
+
+                {/* Status */}
+                <div className="status">
+                  <p className="blink">​ កំពុងដំណើរការ</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         {/* Footer */}

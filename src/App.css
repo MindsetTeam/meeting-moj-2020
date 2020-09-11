@@ -66,7 +66,7 @@
 
 .content-header h3 {
   margin: 0;
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   line-height: 40px;
   color: #000;
   font-weight: bold;
@@ -109,6 +109,125 @@
   background-color: #e7ecb2;
   height: calc(100vh - 20vh - 40px - 43px);
   overflow: hidden;
+}
+
+/* Meeting */
+.meeting {
+  height: 149.3px;
+  /* height: 20vh; */
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  color: #002164;
+  background-color: #6a0e00;
+  border-top: 2px solid #6a0e00;
+  border-right: 2px solid #6a0e00;
+  border-bottom: 2px solid #6a0e00;
+  margin-top: -2px;
+}
+
+.animatedDiv {
+  animation: example 1.5s;
+  border-top: 2px solid #6a0e00;
+  margin-top: 0px;
+}
+
+@keyframes example {
+  75% {
+    height: 149.3px;
+    opacity: 1;
+  }
+  100% {
+    height: 0px;
+    opacity: 0;
+  }
+}
+/* Date Time */
+.datetime {
+  flex: 0.5;
+  font-size: 1.5rem;
+  text-align: center;
+  color: #002164;
+  margin-right: 2px;
+  margin-left: 2px;
+}
+
+.date {
+  height: 90px;
+  background-color: #e7ecb2;
+  margin-bottom: 2px;
+  padding-top: 30px;
+  font-size: 1.54rem;
+}
+
+.time {
+  height: 60px;
+  background-color: #e7ecb2;
+  padding-top: 10px;
+  font-size: 1.54rem;
+}
+
+/* Title */
+.title-container {
+  flex: 2;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  margin-right: 2px;
+  background-color: #e7ecb2;
+}
+
+.title-container .title {
+  text-align: start;
+  color: #002164;
+  font-size: 1.54rem;
+  line-height: 38.5px;
+}
+
+.title-container .info {
+  font-size: 1.54rem;
+}
+
+/* location */
+.location {
+  flex: 0.7;
+  display: flex;
+  flex-direction: row;
+  background-color: #e7ecb2;
+  margin-right: 2px;
+  font-size: 1.54rem;
+}
+
+.location p {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* status */
+.status {
+  flex: 0.5;
+  display: flex;
+  flex-direction: row;
+  margin-right: 0px;
+  background-color: #e7ecb2;
+}
+
+.status p {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: red;
+  font-weight: bolder;
+  font-size: 1.54rem;
 }
 
 /* Footer */
@@ -188,4 +307,90 @@ footer {
   padding-top: 4px;
   height: 46px;
   margin-bottom: 0 !important;
+}
+
+/* Media Query */
+@media only screen and (min-width: 1500px) {
+  .container {
+    height: 100vh !important;
+  }
+
+  .leader {
+    flex: 1;
+  }
+
+  .leader-caption {
+    flex: 1;
+  }
+
+  .date-caption {
+    flex: 0.6;
+  }
+
+  .datetime {
+    flex: 0.6;
+  }
+
+  .title-caption {
+    flex: 4;
+  }
+
+  .title-container {
+    flex: 4;
+  }
+
+  .img-header {
+    width: 100%;
+    height: 15.3vh;
+  }
+}
+
+/* LG Breakpoint */
+@media only screen and (max-width: 991px) {
+  .title-container .title {
+    font-size: 1.4rem;
+  }
+
+  .date-container p {
+    font-size: 1.2em;
+  }
+
+  .time-header {
+    font-size: 1.3em;
+  }
+
+  .container {
+    font-size: 22px !important;
+  }
+}
+
+/* <800px */
+@media only screen and (max-width: 800px) {
+}
+
+/* Md breakpoint */
+@media only screen and (max-width: 767px) {
+}
+
+/* Medium Screen Device*/
+@media only screen and (max-width: 600px) {
+}
+
+/* Small Screen Device */
+@media only screen and (max-width: 350px) {
+}
+
+.blink {
+  animation: blink-animation 1.5s steps(5, start) infinite;
+  -webkit-animation: blink-animation 1.5s steps(5, start) infinite;
+}
+@keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
+@-webkit-keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
 }
