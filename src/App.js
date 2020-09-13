@@ -57,11 +57,10 @@ export class App extends React.Component {
   async componentDidMount() {
     this.dateTimeUpdate();
     await this.fetchMeeting(this.state.date);
-    this.animationMeeting();
     setInterval(async () => {
       await this.fetchMeeting(this.state.date);
-      this.animationMeeting();
     }, 1000);
+    this.animationMeeting();
   }
 
   async fetchMeeting(endDate) {
@@ -74,38 +73,38 @@ export class App extends React.Component {
         now.getMonth(),
         now.getDate() + 1
       );
-      console.log(endDateMeeting, endDateMeeting.toISOString());
     } else if (endDate === "week") {
-      const dayToWeekend = 7 - now.getDate();
+      const dayToWeekend = 7 - now.getDay();
       endDateMeeting = new Date(
         now.getFullYear(),
         now.getMonth(),
         now.getDate() + dayToWeekend
       );
-      console.log(endDateMeeting, endDateMeeting.toISOString());
     } else if (endDate === "month") {
       endDateMeeting = new Date(now.getFullYear(), now.getMonth() + 1);
-      console.log(endDateMeeting, endDateMeeting.toISOString());
     }
     const meeting = await api.fetchMeeting(token, endDateMeeting.toISOString());
-
     console.log(meeting);
-
     if (JSON.stringify(this.state.meeting) !== JSON.stringify(meeting)) {
-      this.setState({
-        meeting,
-        loading: false,
-      });
+      this.setState(
+        {
+          meeting,
+          loading: false,
+        },
+        () => {
+          clearInterval(this.intervalId);
+          this.animationMeeting();
+        }
+      );
     }
   }
 
   animationMeeting() {
     if (this.meetingRef.current.children.length > 5) {
-      setInterval(() => {
+      this.intervalId = setInterval(() => {
         let firstElement = this.meetingRef.current.firstElementChild;
         this.meetingRef.current.children[1].classList.add("animatedDiv");
         this.meetingRef.current.firstElementChild.remove();
-
         if (firstElement.classList.contains("animatedDiv")) {
           firstElement.className = "meeting";
         }
@@ -113,7 +112,7 @@ export class App extends React.Component {
           "beforeend",
           firstElement
         );
-      }, 5000);
+      }, 12000);
     } else {
       let firstElement = this.meetingRef.current.firstElementChild;
       if (firstElement) {
@@ -183,7 +182,7 @@ export class App extends React.Component {
     const { loading, meeting } = this.state;
     const meetingRender = meeting.map((m, i) => {
       let firstClass;
-      if (i === 0) firstClass = "meeting animated";
+      if (i === 0) firstClass = "meeting animatedDiv";
       else firstClass = "meeting";
 
       var start = new Date(m.date);
@@ -278,7 +277,7 @@ export class App extends React.Component {
               <p>
                 ម៉ោង៖{" "}
                 <span className="time-header" ref={this.timeRef}>
-                  09:30
+                  ១១:៣៤
                 </span>{" "}
                 នាទី
               </p>
@@ -288,7 +287,7 @@ export class App extends React.Component {
           {/* Content Body */}
           <div className="content-container">
             {/* Content Header */}
-            <div className="content-header" style={{ marginBottom: "3px" }}>
+            {/* <div className="content-header" style={{ marginBottom: "3px" }}>
               <h3
                 style={{
                   flex: 1,
@@ -298,7 +297,7 @@ export class App extends React.Component {
               >
                 កម្មវិធីប្រជុំ
               </h3>
-            </div>
+            </div> */}
 
             <div className="content-header">
               <h3 className="date-caption">កាលបរិចេ្ឆទ</h3>
@@ -308,7 +307,7 @@ export class App extends React.Component {
             </div>
 
             {/* Content Body */}
-            <div className="content-body" ref={this.meetingRef}>
+            <div className="content-body">
               {this.state.loading && (
                 <div className="loading-container">
                   <div className="sk-chase">
@@ -321,7 +320,9 @@ export class App extends React.Component {
                   </div>
                 </div>
               )}
-              {!this.state.loading && meetingRender}
+              <div className="meetingContainerSelf" ref={this.meetingRef}>
+                {!this.state.loading && meetingRender}
+              </div>
             </div>
           </div>
         </div>
@@ -336,6 +337,7 @@ export class App extends React.Component {
                   date: "today",
                   loading: true,
                 });
+                clearInterval(this.intervalId);
               }}
             >
               ថ្ងៃនេះ
@@ -347,6 +349,7 @@ export class App extends React.Component {
                   date: "week",
                   loading: true,
                 });
+                clearInterval(this.intervalId);
               }}
             >
               សប្ដាហ៌
@@ -358,6 +361,7 @@ export class App extends React.Component {
                   loading: true,
                   date: "month",
                 });
+                clearInterval(this.intervalId);
               }}
             >
               ខែនេះ
@@ -387,7 +391,15 @@ export class App extends React.Component {
                 alt=""
                 style={{ width: "40px", height: "40px" }}
               />
-              <h3>សរុបកិច្ចប្រជុំថ្ងៃនេះ មានចំនួន 2 កិច្ចប្រជុំ</h3>
+              <h3>
+                សរុបកិច្ចប្រជុំ
+                {this.state.date === "today"
+                  ? "ថ្ងៃ"
+                  : this.state.date === "week"
+                  ? "សប្តាហ៍"
+                  : "ខែ"}
+                នេះ មានចំនួន {this.state.meeting?.length} កិច្ចប្រជុំ
+              </h3>
             </div>
             <marquee
               ref={this.marqueeRef}
