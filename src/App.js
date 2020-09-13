@@ -1,6 +1,7 @@
 import React from "react";
 import logo from "./asset/logo.png";
 import "./App.css";
+import api from "./utils/api";
 
 const mapNumber = {
   0: "០",
@@ -48,10 +49,81 @@ export class App extends React.Component {
     this.meetingRef = React.createRef();
     this.state = {
       loading: true,
+      meeting: [],
+      date: "today",
     };
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    this.dateTimeUpdate();
+    await this.fetchMeeting(this.state.date);
+    this.animationMeeting();
+    setInterval(async () => {
+      await this.fetchMeeting(this.state.date);
+      this.animationMeeting();
+    }, 1000);
+  }
+
+  async fetchMeeting(endDate) {
+    const now = new Date();
+    const token = await api.getUserToken();
+    let endDateMeeting;
+    if (endDate === "today") {
+      endDateMeeting = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + 1
+      );
+      console.log(endDateMeeting, endDateMeeting.toISOString());
+    } else if (endDate === "week") {
+      const dayToWeekend = 7 - now.getDate();
+      endDateMeeting = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + dayToWeekend
+      );
+      console.log(endDateMeeting, endDateMeeting.toISOString());
+    } else if (endDate === "month") {
+      endDateMeeting = new Date(now.getFullYear(), now.getMonth() + 1);
+      console.log(endDateMeeting, endDateMeeting.toISOString());
+    }
+    const meeting = await api.fetchMeeting(token, endDateMeeting.toISOString());
+
+    console.log(meeting);
+
+    if (JSON.stringify(this.state.meeting) !== JSON.stringify(meeting)) {
+      this.setState({
+        meeting,
+        loading: false,
+      });
+    }
+  }
+
+  animationMeeting() {
+    if (this.meetingRef.current.children.length > 5) {
+      setInterval(() => {
+        let firstElement = this.meetingRef.current.firstElementChild;
+        this.meetingRef.current.children[1].classList.add("animatedDiv");
+        this.meetingRef.current.firstElementChild.remove();
+
+        if (firstElement.classList.contains("animatedDiv")) {
+          firstElement.className = "meeting";
+        }
+        this.meetingRef.current.insertAdjacentElement(
+          "beforeend",
+          firstElement
+        );
+      }, 5000);
+    } else {
+      let firstElement = this.meetingRef.current.firstElementChild;
+      if (firstElement) {
+        firstElement.classList.remove("animatedDiv");
+        firstElement.style.marginTop = "0px";
+      }
+    }
+  }
+
+  dateTimeUpdate() {
     setInterval(() => {
       var current = new Date();
       var timeArray = current
@@ -81,28 +153,6 @@ export class App extends React.Component {
       this.dateRef.current.textContent = `ថ្ងៃ${day} ទី${date}​ ខែ${month} ឆ្នាំ${year}`;
       this.timeRef.current.textContent = time;
     }, 500);
-
-    if (this.meetingRef.current.children.length > 5) {
-      setInterval(() => {
-        let firstElement = this.meetingRef.current.firstElementChild;
-        this.meetingRef.current.children[1].classList.add("animatedDiv");
-        this.meetingRef.current.firstElementChild.remove();
-
-        if (firstElement.classList.contains("animatedDiv")) {
-          firstElement.className = "meeting";
-        }
-        this.meetingRef.current.insertAdjacentElement(
-          "beforeend",
-          firstElement
-        );
-      }, 3000);
-    } else {
-      let firstElement = this.meetingRef.current.firstElementChild;
-      if (firstElement) {
-        firstElement.classList.remove("animatedDiv");
-        firstElement.style.marginTop = "0px";
-      }
-    }
   }
 
   toggleFullscreen = (e) => {
@@ -130,7 +180,92 @@ export class App extends React.Component {
   };
 
   render() {
-    const { loading } = this.state;
+    const { loading, meeting } = this.state;
+    const meetingRender = meeting.map((m, i) => {
+      let firstClass;
+      if (i === 0) firstClass = "meeting animated";
+      else firstClass = "meeting";
+
+      var start = new Date(m.date);
+      var timeArray = start
+        .toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        })
+        .split(" ");
+      var day = ("0" + start.getDate())
+        .slice(-2)
+        .replace(/[0123456789]/g, (value) => {
+          return mapNumber[value];
+        });
+      var month = khmerMonth[start.getMonth()];
+      var year = start
+        .getFullYear()
+        .toString()
+        .replace(/[0123456789]/g, (value) => {
+          return mapNumber[value];
+        });
+      var time =
+        timeArray[0].replace(/[0123456789]/g, (value) => {
+          return mapNumber[value];
+        }) +
+        " " +
+        (timeArray[1] == "AM" ? "ព្រឹក" : "ល្ងាច");
+
+      let mObj = (
+        <div className={firstClass}>
+          {/* Date Time */}
+          <div className="datetime">
+            <div className="date">
+              <p>
+                {day}-{month}-{year}
+              </p>
+            </div>
+            <div className="time">
+              <p>{time}</p>
+            </div>
+          </div>
+          {/* Title */}
+          <div className="title-container">
+            <div className="title">
+              <p>
+                {" "}
+                <span style={{ fontWeight: "bolder" }}>កម្មវត្ថុ៖</span>{" "}
+                {m.title.rendered}
+              </p>
+            </div>
+            <div className="info">
+              <p>
+                <span style={{ fontWeight: "bolder" }}>ដឹកនាំដោយ៖</span>{" "}
+                <span>{m.acf.leader}</span>{" "}
+                <span>
+                  {m.acf.position.length === 1
+                    ? m.acf.position
+                    : m.acf.position.join(" ")}
+                </span>
+              </p>
+            </div>
+          </div>
+
+          {/* Location */}
+          <div className="location">
+            <p>{m.acf.room}</p>
+          </div>
+
+          {/* Status */}
+          <div className="status">
+            <p className="blink">​{i === 0 ? "កំពុងដំណើរការ" : "រង់ចាំ"}</p>
+          </div>
+        </div>
+      );
+      return mObj;
+    });
+
+    const marqueeRender = meeting.map((m, i) => {
+      let mObj = <p>{m.title.rendered}</p>;
+      return mObj;
+    });
     return (
       <div className="App">
         <div className="AppContainer">
@@ -173,275 +308,20 @@ export class App extends React.Component {
             </div>
 
             {/* Content Body */}
-
             <div className="content-body" ref={this.meetingRef}>
-              <div className="meeting animatedDiv">
-                {/* Date Time */}
-                <div className="datetime">
-                  <div className="date">
-                    <p>០៩-កញ្ញា-២០២០</p>
-                  </div>
-                  <div className="time">
-                    <p>០៧:០០ ព្រឹក</p>
-                  </div>
-                </div>
-                {/* Title */}
-                <div className="title-container">
-                  <div className="title">
-                    <p>
-                      {" "}
-                      <span style={{ fontWeight: "bolder" }}>
-                        កម្មវត្ថុ៖
-                      </span>{" "}
-                      កិច្ចប្រជុំក្រុមការងាររាជរដ្ឋាភិបាល ពិនិត្យលើសំណើ
-                      របស់សង្គមស៊ីវិល
-                      ស្នើសុំធ្វើវិសោធនកម្មច្បាប់ស្តីពីសមាគមនិងអង្គការមិនមែនរដ្ឋាភិបាល
-                    </p>
-                  </div>
-                  <div className="info">
-                    <p>
-                      <span style={{ fontWeight: "bolder" }}>ដឹកនាំដោយ៖</span>{" "}
-                      <span>ឯកឧត្តម ជិន ម៉ាលីន</span>{" "}
-                      <span>
-                        រដ្ឋលេខាធិការ និងជាអ្នកនាំពាក្យក្រសួងយុត្តិធម៌
-                      </span>
-                    </p>
+              {this.state.loading && (
+                <div className="loading-container">
+                  <div className="sk-chase">
+                    <div className="sk-chase-dot"></div>
+                    <div className="sk-chase-dot"></div>
+                    <div className="sk-chase-dot"></div>
+                    <div className="sk-chase-dot"></div>
+                    <div className="sk-chase-dot"></div>
+                    <div className="sk-chase-dot"></div>
                   </div>
                 </div>
-
-                {/* Location */}
-                <div className="location">
-                  <p>ទីស្តីការក្រសួង (បន្ទប់ ក)</p>
-                </div>
-
-                {/* Status */}
-                <div className="status">
-                  <p className="blink">​ កំពុងដំណើរការ</p>
-                </div>
-              </div>
-
-              <div className="meeting">
-                {/* Date Time */}
-                <div className="datetime">
-                  <div className="date">
-                    <p>០៩-កញ្ញា-២០២០</p>
-                  </div>
-                  <div className="time">
-                    <p>០៧:០០ ព្រឹក</p>
-                  </div>
-                </div>
-                {/* Title */}
-                <div className="title-container">
-                  <div className="title">
-                    <p>
-                      {" "}
-                      <span style={{ fontWeight: "bolder" }}>
-                        កម្មវត្ថុ៖
-                      </span>{" "}
-                      កិច្ចប្រជុំក្រុមការងាររាជរដ្ឋាភិបាល ពិនិត្យលើសំណើ
-                      របស់សង្គមស៊ីវិល
-                      ស្នើសុំធ្វើវិសោធនកម្មច្បាប់ស្តីពីសមាគមនិងអង្គការមិនមែនរដ្ឋាភិបាល
-                    </p>
-                  </div>
-                  <div className="info">
-                    <p>
-                      <span style={{ fontWeight: "bolder" }}>ដឹកនាំដោយ៖</span>{" "}
-                      <span>ឯកឧត្តម ជិន ម៉ាលីន</span>{" "}
-                      <span>
-                        រដ្ឋលេខាធិការ និងជាអ្នកនាំពាក្យក្រសួងយុត្តិធម៌
-                      </span>
-                    </p>
-                  </div>
-                </div>
-
-                {/* Location */}
-                <div className="location">
-                  <p>ទីស្តីការក្រសួង (បន្ទប់ ក)</p>
-                </div>
-
-                {/* Status */}
-                <div className="status">
-                  <p className="blink">​ កំពុងដំណើរការ</p>
-                </div>
-              </div>
-
-              <div className="meeting">
-                {/* Date Time */}
-                <div className="datetime">
-                  <div className="date">
-                    <p>០៩-កញ្ញា-២០២០</p>
-                  </div>
-                  <div className="time">
-                    <p>០៧:០០ ព្រឹក</p>
-                  </div>
-                </div>
-                {/* Title */}
-                <div className="title-container">
-                  <div className="title">
-                    <p>
-                      {" "}
-                      <span style={{ fontWeight: "bolder" }}>
-                        កម្មវត្ថុ៖
-                      </span>{" "}
-                      កិច្ចប្រជុំក្រុមការងាររាជរដ្ឋាភិបាល ពិនិត្យលើសំណើ
-                      របស់សង្គមស៊ីវិល
-                      ស្នើសុំធ្វើវិសោធនកម្មច្បាប់ស្តីពីសមាគមនិងអង្គការមិនមែនរដ្ឋាភិបាល
-                    </p>
-                  </div>
-                  <div className="info">
-                    <p>
-                      <span style={{ fontWeight: "bolder" }}>ដឹកនាំដោយ៖</span>{" "}
-                      <span>ឯកឧត្តម ជិន ម៉ាលីន</span>{" "}
-                      <span>
-                        រដ្ឋលេខាធិការ និងជាអ្នកនាំពាក្យក្រសួងយុត្តិធម៌
-                      </span>
-                    </p>
-                  </div>
-                </div>
-
-                {/* Location */}
-                <div className="location">
-                  <p>ទីស្តីការក្រសួង (បន្ទប់ ក)</p>
-                </div>
-
-                {/* Status */}
-                <div className="status">
-                  <p className="blink">​ កំពុងដំណើរការ</p>
-                </div>
-              </div>
-
-              <div className="meeting">
-                {/* Date Time */}
-                <div className="datetime">
-                  <div className="date">
-                    <p>០៩-កញ្ញា-២០២០</p>
-                  </div>
-                  <div className="time">
-                    <p>០៧:០០ ព្រឹក</p>
-                  </div>
-                </div>
-                {/* Title */}
-                <div className="title-container">
-                  <div className="title">
-                    <p>
-                      {" "}
-                      <span style={{ fontWeight: "bolder" }}>
-                        កម្មវត្ថុ៖
-                      </span>{" "}
-                      កិច្ចប្រជុំក្រុមការងាររាជរដ្ឋាភិបាល ពិនិត្យលើសំណើ
-                      របស់សង្គមស៊ីវិល
-                      ស្នើសុំធ្វើវិសោធនកម្មច្បាប់ស្តីពីសមាគមនិងអង្គការមិនមែនរដ្ឋាភិបាល
-                    </p>
-                  </div>
-                  <div className="info">
-                    <p>
-                      <span style={{ fontWeight: "bolder" }}>ដឹកនាំដោយ៖</span>{" "}
-                      <span>ឯកឧត្តម ជិន ម៉ាលីន</span>{" "}
-                      <span>
-                        រដ្ឋលេខាធិការ និងជាអ្នកនាំពាក្យក្រសួងយុត្តិធម៌
-                      </span>
-                    </p>
-                  </div>
-                </div>
-
-                {/* Location */}
-                <div className="location">
-                  <p>ទីស្តីការក្រសួង (បន្ទប់ ក)</p>
-                </div>
-
-                {/* Status */}
-                <div className="status">
-                  <p className="blink">​ កំពុងដំណើរការ</p>
-                </div>
-              </div>
-
-              <div className="meeting">
-                {/* Date Time */}
-                <div className="datetime">
-                  <div className="date">
-                    <p>០៩-កញ្ញា-២០២០</p>
-                  </div>
-                  <div className="time">
-                    <p>០៧:០០ ព្រឹក</p>
-                  </div>
-                </div>
-                {/* Title */}
-                <div className="title-container">
-                  <div className="title">
-                    <p>
-                      {" "}
-                      <span style={{ fontWeight: "bolder" }}>
-                        កម្មវត្ថុ៖
-                      </span>{" "}
-                      កិច្ចប្រជុំក្រុមការងាររាជរដ្ឋាភិបាល ពិនិត្យលើសំណើ
-                      របស់សង្គមស៊ីវិល
-                      ស្នើសុំធ្វើវិសោធនកម្មច្បាប់ស្តីពីសមាគមនិងអង្គការមិនមែនរដ្ឋាភិបាល
-                    </p>
-                  </div>
-                  <div className="info">
-                    <p>
-                      <span style={{ fontWeight: "bolder" }}>ដឹកនាំដោយ៖</span>{" "}
-                      <span>ឯកឧត្តម ជិន ម៉ាលីន</span>{" "}
-                      <span>
-                        រដ្ឋលេខាធិការ និងជាអ្នកនាំពាក្យក្រសួងយុត្តិធម៌
-                      </span>
-                    </p>
-                  </div>
-                </div>
-                {/* Location */}
-                <div className="location">
-                  <p>ទីស្តីការក្រសួង (បន្ទប់ ក)</p>
-                </div>
-
-                {/* Status */}
-                <div className="status">
-                  <p className="blink">​ កំពុងដំណើរការ</p>
-                </div>
-              </div>
-
-              <div className="meeting">
-                {/* Date Time */}
-                <div className="datetime">
-                  <div className="date">
-                    <p>០៩-កញ្ញា-២០២០</p>
-                  </div>
-                  <div className="time">
-                    <p>០៧:០០ ព្រឹក</p>
-                  </div>
-                </div>
-                {/* Title */}
-                <div className="title-container">
-                  <div className="title">
-                    <p>
-                      {" "}
-                      <span style={{ fontWeight: "bolder" }}>
-                        កម្មវត្ថុ៖
-                      </span>{" "}
-                      កិច្ចប្រជុំក្រុមការងាររាជរដ្ឋាភិបាល ពិនិត្យលើសំណើ
-                      របស់សង្គមស៊ីវិល
-                      ស្នើសុំធ្វើវិសោធនកម្មច្បាប់ស្តីពីសមាគមនិងអង្គការមិនមែនរដ្ឋាភិបាល
-                    </p>
-                  </div>
-                  <div className="info">
-                    <p>
-                      <span style={{ fontWeight: "bolder" }}>ដឹកនាំដោយ៖</span>{" "}
-                      <span>ឯកឧត្តម ជិន ម៉ាលីន</span>{" "}
-                      <span>
-                        រដ្ឋលេខាធិការ និងជាអ្នកនាំពាក្យក្រសួងយុត្តិធម៌
-                      </span>
-                    </p>
-                  </div>
-                </div>
-                {/* Location */}
-                <div className="location">
-                  <p>ទីស្តីការក្រសួង (បន្ទប់ ក)</p>
-                </div>
-
-                {/* Status */}
-                <div className="status">
-                  <p className="blink">​ កំពុងដំណើរការ</p>
-                </div>
-              </div>
+              )}
+              {!this.state.loading && meetingRender}
             </div>
           </div>
         </div>
@@ -449,9 +329,39 @@ export class App extends React.Component {
         <footer>
           {/* Content Footer */}
           <div className="content-footer">
-            <span style={{ fontFamily: "Dangrek" }}>ថ្ងៃនេះ</span>
-            <span style={{ fontFamily: "Dangrek" }}>សប្ដាហ៌</span>
-            <span style={{ fontFamily: "Dangrek" }}>ខែនេះ</span>
+            <span
+              style={{ fontFamily: "Dangrek" }}
+              onClick={() => {
+                this.setState({
+                  date: "today",
+                  loading: true,
+                });
+              }}
+            >
+              ថ្ងៃនេះ
+            </span>
+            <span
+              style={{ fontFamily: "Dangrek" }}
+              onClick={() => {
+                this.setState({
+                  date: "week",
+                  loading: true,
+                });
+              }}
+            >
+              សប្ដាហ៌
+            </span>
+            <span
+              style={{ fontFamily: "Dangrek" }}
+              onClick={() => {
+                this.setState({
+                  loading: true,
+                  date: "month",
+                });
+              }}
+            >
+              ខែនេះ
+            </span>
 
             <div className="navigation">
               <div className="left">
@@ -490,8 +400,7 @@ export class App extends React.Component {
                 this.marqueeRef.current.start();
               }}
             >
-              <p>hi123123</p>
-              <p>hi123123</p>
+              {marqueeRender}
             </marquee>
           </div>
         </footer>
