@@ -162,7 +162,7 @@
 .date {
   height: 90px;
   background-color: #e7ecb2;
-  /* margin-bottom: 2px; */
+  margin-bottom: -1px;
   padding-top: 30px;
   font-size: 1.2rem;
 }
@@ -170,7 +170,7 @@
 .time {
   height: 60px;
   background-color: #e7ecb2;
-  padding-top: 10px;
+  padding-top: 11px;
   font-size: 1.2rem;
 }
 
@@ -368,6 +368,7 @@ footer {
   .title-container .info {
     font-size: 1.35rem;
   }
+
   .title-container .title {
     font-size: 1.4rem;
   }
@@ -386,20 +387,16 @@ footer {
 }
 
 /* <800px */
-@media only screen and (max-width: 800px) {
-}
+@media only screen and (max-width: 800px) {}
 
 /* Md breakpoint */
-@media only screen and (max-width: 767px) {
-}
+@media only screen and (max-width: 767px) {}
 
 /* Medium Screen Device*/
-@media only screen and (max-width: 600px) {
-}
+@media only screen and (max-width: 600px) {}
 
 /* Small Screen Device */
-@media only screen and (max-width: 350px) {
-}
+@media only screen and (max-width: 350px) {}
 
 .blink {
   animation: blink-animation 1.5s steps(5, start) infinite;
@@ -506,6 +503,7 @@ footer {
 }
 
 @keyframes sk-chase-dot {
+
   80%,
   100% {
     transform: rotate(360deg);
