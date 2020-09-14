@@ -55,12 +55,13 @@ export class App extends React.Component {
   }
 
   async componentDidMount() {
+    console.log("hi ");
     this.dateTimeUpdate();
     await this.fetchMeeting(this.state.date);
     setInterval(async () => {
       await this.fetchMeeting(this.state.date);
     }, 1000);
-    this.animationMeeting();
+    // this.animationMeeting();
   }
 
   async fetchMeeting(endDate) {
@@ -398,7 +399,13 @@ export class App extends React.Component {
                   : this.state.date === "week"
                   ? "សប្តាហ៍"
                   : "ខែ"}
-                នេះ មានចំនួន {this.state.meeting?.length} កិច្ចប្រជុំ
+                នេះ មានចំនួន{" "}
+                {this.state.meeting?.length
+                  .toString()
+                  .replace(/[0123456789]/g, (value) => {
+                    return mapNumber[value];
+                  })}{" "}
+                កិច្ចប្រជុំ
               </h3>
             </div>
             <marquee

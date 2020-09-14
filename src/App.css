@@ -20,7 +20,7 @@
   margin-top: 3px;
   height: 9vh;
   width: 100%;
-  background: url("./asset/meeting/meetingImg1.jpg");
+  background: url("./asset/meeting/meetingImg.jpg");
   background-position: center center;
   background-repeat: no-repeat;
   background-size: 100% 100%;
@@ -162,16 +162,16 @@
 .date {
   height: 90px;
   background-color: #e7ecb2;
-  margin-bottom: 2px;
+  /* margin-bottom: 2px; */
   padding-top: 30px;
-  font-size: 1.54rem;
+  font-size: 1.2rem;
 }
 
 .time {
   height: 60px;
   background-color: #e7ecb2;
   padding-top: 10px;
-  font-size: 1.54rem;
+  font-size: 1.2rem;
 }
 
 /* Title */
@@ -353,6 +353,16 @@ footer {
   }
 }
 
+@media only screen and (min-width: 1700px) {
+  .date {
+    font-size: 1.5rem;
+  }
+
+  .time {
+    font-size: 1.5rem;
+  }
+}
+
 /* LG Breakpoint */
 @media only screen and (max-width: 991px) {
   .title-container .info {
@@ -376,16 +386,20 @@ footer {
 }
 
 /* <800px */
-@media only screen and (max-width: 800px) {}
+@media only screen and (max-width: 800px) {
+}
 
 /* Md breakpoint */
-@media only screen and (max-width: 767px) {}
+@media only screen and (max-width: 767px) {
+}
 
 /* Medium Screen Device*/
-@media only screen and (max-width: 600px) {}
+@media only screen and (max-width: 600px) {
+}
 
 /* Small Screen Device */
-@media only screen and (max-width: 350px) {}
+@media only screen and (max-width: 350px) {
+}
 
 .blink {
   animation: blink-animation 1.5s steps(5, start) infinite;
@@ -492,7 +506,6 @@ footer {
 }
 
 @keyframes sk-chase-dot {
-
   80%,
   100% {
     transform: rotate(360deg);
