@@ -54,9 +54,12 @@ export class App extends React.Component {
       };
    }
 
-   // async componentDidUpdate() {
-   //    await this.fetchMeeting(this.state.date);
-   // }
+   async componentDidUpdate() {
+      clearInterval(this.intervalFetch);
+      this.intervalFetch = setInterval(async () => {
+         await this.fetchMeeting(this.state.date);
+      }, 6000);
+   }
 
    async componentDidMount() {
       this.dateTimeUpdate();
@@ -99,7 +102,7 @@ export class App extends React.Component {
                loading: false,
             },
             () => {
-               clearInterval(this.intervalId);
+               clearInterval(this.intervalMeeting);
                this.animationMeeting();
             }
          );
@@ -112,7 +115,7 @@ export class App extends React.Component {
 
    animationMeeting() {
       if (this.meetingRef.current.children.length > 5) {
-         this.intervalId = setInterval(() => {
+         this.intervalMeeting = setInterval(() => {
             let firstElement = this.meetingRef.current.firstElementChild;
             this.meetingRef.current.children[1].classList.add("animatedDiv");
             this.meetingRef.current.firstElementChild.remove();
@@ -277,7 +280,11 @@ export class App extends React.Component {
       });
 
       const marqueeRender = meeting?.map((m, i) => {
-         let mObj = <p key={i}>{m.title.rendered}</p>;
+         let mObj = (
+            <p key={i}>
+               {i}/ {m.title.rendered}
+            </p>
+         );
          return mObj;
       });
       return (
@@ -339,7 +346,7 @@ export class App extends React.Component {
                   <span
                      style={{ fontFamily: "Dangrek" }}
                      onClick={() => {
-                        clearInterval(this.intervalId);
+                        clearInterval(this.intervalMeeting);
                         this.setState(
                            {
                               date: "today",
@@ -357,7 +364,7 @@ export class App extends React.Component {
                   <span
                      style={{ fontFamily: "Dangrek" }}
                      onClick={() => {
-                        clearInterval(this.intervalId);
+                        clearInterval(this.intervalMeeting);
                         this.setState(
                            {
                               date: "week",
@@ -375,7 +382,7 @@ export class App extends React.Component {
                   <span
                      style={{ fontFamily: "Dangrek" }}
                      onClick={() => {
-                        clearInterval(this.intervalId);
+                        clearInterval(this.intervalMeeting);
                         this.setState(
                            {
                               loading: true,
