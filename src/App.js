@@ -288,7 +288,10 @@ export class App extends React.Component {
     const marqueeRender = meeting?.map((m, i) => {
       let mObj = (
         <p key={i}>
-          {i}/ {m.title.rendered}
+          {(i + 1).toString().replace(/[0123456789]/g, (value) => {
+            return mapNumber[value];
+          })}
+          / {m.title.rendered}
         </p>
       );
       return mObj;
