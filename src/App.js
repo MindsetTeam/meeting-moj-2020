@@ -47,6 +47,7 @@ export class App extends React.Component {
     this.timeRef = React.createRef();
     this.marqueeRef = React.createRef();
     this.meetingRef = React.createRef();
+    this.token = "";
     this.state = {
       loading: true,
       meeting: [],
@@ -55,7 +56,6 @@ export class App extends React.Component {
   }
 
   async componentDidUpdate() {
-    console.log("hi did update");
     clearInterval(this.intervalFetch);
     this.intervalFetch = setInterval(async () => {
       await this.fetchMeeting(this.state.date);
@@ -63,7 +63,6 @@ export class App extends React.Component {
   }
 
   async componentDidMount() {
-    console.log("hi did mount");
     this.dateTimeUpdate();
     await this.fetchMeeting(this.state.date);
     // setInterval(async () => {
@@ -74,7 +73,9 @@ export class App extends React.Component {
 
   async fetchMeeting(endDate) {
     const now = new Date();
-    const token = await api.getUserToken();
+    if (!this.token) {
+      this.token = await api.getUserToken();
+    }
     let endDateMeeting;
     if (endDate === "today") {
       endDateMeeting = new Date(
@@ -92,8 +93,10 @@ export class App extends React.Component {
     } else if (endDate === "month") {
       endDateMeeting = new Date(now.getFullYear(), now.getMonth() + 1);
     }
-    const meeting = await api.fetchMeeting(token, endDateMeeting.toISOString());
-    console.log(meeting);
+    const meeting = await api.fetchMeeting(
+      this.token,
+      endDateMeeting.toISOString()
+    );
     if (JSON.stringify(this.state.meeting) !== JSON.stringify(meeting)) {
       this.setState(
         {
@@ -109,7 +112,7 @@ export class App extends React.Component {
           loading: false,
         },
         () => {
-         //  clearInterval(this.intervalMeeting);
+          //  clearInterval(this.intervalMeeting);
           this.animationMeeting();
         }
       );
