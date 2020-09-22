@@ -95,9 +95,8 @@ export class App extends React.Component {
     }
     let meeting = await api.fetchMeeting(
       this.token,
-      endDateMeeting.toISOString()
+      new Date(endDateMeeting.getTime() + 1000 * 60 * 60 * 7).toISOString()
     );
-    console.log(meeting);
     meeting = meeting?.filter(
       (meeting) => new Date(meeting.acf.end_date_time).getTime() > Date.now()
     );
@@ -278,15 +277,12 @@ export class App extends React.Component {
           {/* Location */}
           <div className="location">
             <p>{m.acf.room}</p>
-          </div>
-
-          {/* ​{i === 0 ?  "រង់ចាំ": "ជិតប្រជុំ"(30mn):"កំពុងដំណើរការ"(<published date) :"លើកពេល"(==="លើកពេល") } */}
-          {/* Status */}
+          </div>    
           <div className="status">
             <p className="blink">
               {m.acf.options === "លើកពេល"
                 ? "លើកពេល"
-                : new Date(m.date).getTime() > Date.now() - 1000 * 60 * 30
+                : (new Date(m.date).getTime() -( 1000 * 60 * 30)  < Date.now() && new Date(m.date).getTime() > Date.now())
                 ? "ជិតប្រជុំ"
                 : new Date(m.date).getTime() < Date.now()
                 ? "កំពុងដំណើរការ"
