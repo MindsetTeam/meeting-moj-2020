@@ -93,9 +93,13 @@ export class App extends React.Component {
     } else if (endDate === "month") {
       endDateMeeting = new Date(now.getFullYear(), now.getMonth() + 1);
     }
-    const meeting = await api.fetchMeeting(
+    let meeting = await api.fetchMeeting(
       this.token,
       endDateMeeting.toISOString()
+    );
+    console.log(meeting);
+    meeting = meeting?.filter(
+      (meeting) => new Date(meeting.acf.end_date_time).getTime() > Date.now()
     );
     if (JSON.stringify(this.state.meeting) !== JSON.stringify(meeting)) {
       this.setState(
@@ -124,7 +128,7 @@ export class App extends React.Component {
   }
 
   animationMeeting() {
-    if (this.meetingRef.current.children.length > 5) {
+    if (this.meetingRef.current?.children.length > 5) {
       this.intervalMeeting = setInterval(() => {
         let firstElement = this.meetingRef.current.firstElementChild;
         this.meetingRef.current.children[1].classList.add("animatedDiv");
@@ -276,9 +280,18 @@ export class App extends React.Component {
             <p>{m.acf.room}</p>
           </div>
 
+          {/* ​{i === 0 ?  "រង់ចាំ": "ជិតប្រជុំ"(30mn):"កំពុងដំណើរការ"(<published date) :"លើកពេល"(==="លើកពេល") } */}
           {/* Status */}
           <div className="status">
-            <p className="blink">​{i === 0 ? "កំពុងដំណើរការ" : "រង់ចាំ"}</p>
+            <p className="blink">
+              {m.acf.options === "លើកពេល"
+                ? "លើកពេល"
+                : new Date(m.date).getTime() > Date.now() - 1000 * 60 * 30
+                ? "ជិតប្រជុំ"
+                : new Date(m.date).getTime() < Date.now()
+                ? "កំពុងដំណើរការ"
+                : "រង់ចាំ"}
+            </p>
           </div>
         </div>
       );
