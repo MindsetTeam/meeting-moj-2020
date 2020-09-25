@@ -18,13 +18,14 @@ export class MeetingAll extends Component {
     loading: true
   };
   componentDidMount = async () => {
-    const now = new Date();
-    const endDateMeeting = new Date(now.getFullYear(), now.getMonth() + 1);
+    // const now = new Date();
+    // const endDateMeeting = new Date(now.getFullYear(), now.getMonth() + 1);
     const token = await api.getUserToken();
     if (token) {
       const meetings = await api.fetchMeeting(
         token,
-        new Date(endDateMeeting.getTime() + 1000 * 60 * 60 * 7).toISOString()
+        new Date(new Date().getFullYear()+1,0,0).toISOString(),
+        new Date(new Date().getFullYear(),0,0).toISOString(),
       );
       this.setState({
         meeting: meetings,
@@ -55,7 +56,7 @@ export class MeetingAll extends Component {
         <div className="row">
           <div className="col-md-8">
           {this.state.loading && <Loading />}
-            {!this.state.loading&&this.state.meeting.map((v, i) => {
+            {!this.state.loading&& (this.state.meeting.length>0)&&this.state.meeting.map((v, i) => {
               let idMonth = null;
               let monthMeeting = new Date(v.date).getMonth()
               if(existedMonth.indexOf(monthMeeting)<0){

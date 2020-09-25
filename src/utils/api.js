@@ -13,26 +13,51 @@ export default {
     ).then((res) => res.json());
     return result.token;
   },
-  async fetchMeeting(token, endDateISO) {
+  async fetchMeeting(token, endDateISO, startDateISO, limit) {
+    // let startDate =
+    //   startDateISO ||
+    //   new Date(
+    //     new Date(new Date().toLocaleDateString()).getTime() + 60 * 7 * 60 * 1000
+    //   ).toISOString();
+    let startDate =
+      startDateISO ||
+      new Date(
+        new Date(new Date().toLocaleDateString()).getTime() + 60 * 2 * 60 * 1000
+      ).toISOString();
+    let totalPage = 0;
+    let returnMeetings = [];
     if (token) {
       let url =
-        "http://demo.mcs.gov.kh/wp-json/wp/v2/posts?_fields=date,acf,title&orderby=date&order=asc&status=publish,future";
-      url +=
-        "&after=" +
-        new Date(
-          new Date(new Date().toLocaleDateString()).getTime() +
-            60 * 7 * 60 * 1000
-        ).toISOString();
-      //   console.log(new Date().toISOString())
+        "http://demo.mcs.gov.kh/wp-json/wp/v2/posts?_fields=date,acf,title&orderby=date&order=asc&status=publish,future&per_page=" +
+        (limit || 100);
+      url += "&after=" + startDate;
       if (endDateISO) {
         url += "&before=" + endDateISO;
       }
-      return await fetch(url, {
+
+      const fetchedMeeting = await fetch(url, {
         method: "GET",
         headers: {
           Authorization: "Bearer " + token,
         },
-      }).then((res) => res.json());
+      }).then((res) => {
+        totalPage = res.headers.get("x-wp-totalpages");
+        return res.json();
+      });
+
+      if (totalPage > 1 && !limit) {
+        for (let i = 2; i <= totalPage; i++) {
+          const moreMeeting = await fetch(`${url}&page=${i}`, {
+            method: "GET",
+            headers: {
+              Authorization: "Bearer " + token,
+            },
+          }).then((res) => res.json());
+          returnMeetings.push(...moreMeeting);
+        }
+      }
+      returnMeetings.push(...fetchedMeeting);
     }
+    return returnMeetings;
   },
 };
