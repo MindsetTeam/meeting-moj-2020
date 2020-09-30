@@ -1,8 +1,8 @@
 import React from "react";
-import {Link} from "react-router-dom"
+import { Link } from "react-router-dom";
 import logo from "../../asset/logo.png";
 import api from "../../utils/api";
-import Loading from "../Layout/Loading"
+import Loading from "../Layout/Loading";
 
 const mapNumber = {
   0: "០",
@@ -62,7 +62,9 @@ export class Meeting extends React.Component {
       await this.fetchMeeting(this.state.date);
     }, 6000);
   }
-
+  componentWillUnmount() {
+    clearInterval(this.intervalFetch);
+  }
   async componentDidMount() {
     this.dateTimeUpdate();
     await this.fetchMeeting(this.state.date);
@@ -425,11 +427,14 @@ export class Meeting extends React.Component {
           {/* Marquee */}
           <div className="marquee">
             <div className="marquee-caption">
-             <Link to="allMeeting">  <img
-                src={logo}
-                alt=""
-                style={{ width: "40px", height: "40px" }}
-              /></Link>
+              <Link to="allMeeting">
+                {" "}
+                <img
+                  src={logo}
+                  alt=""
+                  style={{ width: "40px", height: "40px" }}
+                />
+              </Link>
               <h3>
                 សរុបកិច្ចប្រជុំ
                 {this.state.date === "today"

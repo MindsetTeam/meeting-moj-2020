@@ -13,6 +13,12 @@ export default {
     ).then((res) => res.json());
     return result.token;
   },
+  async getFirstYear() {
+    let url =
+      "http://demo.mcs.gov.kh/wp-json/wp/v2/posts?_fields=date&orderby=date&order=asc&status=publish&per_page=1";
+    const data=  await fetch(url).then((res) => res.json());
+    return new Date(data[0].date).getFullYear();
+  },
   async fetchMeeting(token, endDateISO, startDateISO, limit) {
     // let startDate =
     //   startDateISO ||
@@ -58,6 +64,7 @@ export default {
       }
       returnMeetings.push(...fetchedMeeting);
     }
+    console.log(returnMeetings);
     return returnMeetings;
   },
 };
