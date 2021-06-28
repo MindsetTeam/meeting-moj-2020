@@ -1,13 +1,16 @@
 export default {
   async getUserToken() {
     const result = await fetch(
-      "http://demo.mcs.gov.kh/wp-json/jwt-auth/v1/token",
+      // "http://demo.mcs.gov.kh/wp-json/jwt-auth/v1/token",
+      "http://localhost/moj-meeting/wp-json/jwt-auth/v1/token",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username: process.env.REACT_APP_USERNAME,
-          password: process.env.REACT_APP_PASSWORD,
+          username: 'srun',
+          password: 123,
+          // username: process.env.REACT_APP_USERNAME,
+          // password: process.env.REACT_APP_PASSWORD,
         }),
       }
     ).then((res) => res.json());
@@ -15,7 +18,7 @@ export default {
   },
   async getFirstYear() {
     let url =
-      "http://demo.mcs.gov.kh/wp-json/wp/v2/posts?_fields=date&orderby=date&order=asc&status=publish&per_page=1";
+      "http://localhost/moj-meeting/wp-json/wp/v2/posts?_fields=date&orderby=date&order=asc&status=publish&per_page=1";
     const data=  await fetch(url).then((res) => res.json());
     return new Date(data[0].date).getFullYear();
   },
@@ -34,7 +37,7 @@ export default {
     let returnMeetings = [];
     if (token) {
       let url =
-        "http://demo.mcs.gov.kh/wp-json/wp/v2/posts?_fields=date,acf,title&orderby=date&order=asc&status=publish,future&per_page=" +
+        "http://localhost/moj-meeting/wp-json/wp/v2/posts?_fields=date,acf,title&orderby=date&order=asc&status=publish,future&per_page=" +
         (limit || 100);
       url += "&after=" + startDate;
       if (endDateISO) {
