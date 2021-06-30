@@ -22,7 +22,8 @@ export class MeetingAll extends Component {
     year: [],
   };
   componentDidMount = async () => {
-    this.token = await api.getUserToken();
+    const { token } = await api.getUserToken();
+    this.token = token;
     const allYear = [];
     const firstYear = await api.getFirstYear();
     const currentYear = new Date().getFullYear();
@@ -274,8 +275,10 @@ export class MeetingAll extends Component {
                                   <span style={{ fontWeight: "bold" }}>
                                     កាលបរិចេ្ឆទ៖
                                   </span>{" "}
-                                
-                                  {khmerConverter.dateToKhmer(v.date).fullKhmerDateTime}
+                                  {
+                                    khmerConverter.dateToKhmer(v.date)
+                                      .fullKhmerDateTime
+                                  }
                                 </h4>
                                 <hr />
                                 <h4>

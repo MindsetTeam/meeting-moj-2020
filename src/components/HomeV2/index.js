@@ -1,7 +1,8 @@
-import React, { createRef, useEffect, useState } from "react";
+import React, { createRef, useEffect, useState, useCallback, useContext } from "react";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../../App";
 import logo from "../../asset/logo.png";
-import api from "../../utils/api";
+import API from "../../utils/api";
 import Loading from "../Layout/Loading";
 
 const mapNumber = {
@@ -43,6 +44,8 @@ const khmerDay = [
 ];
 
 const Meeting = () => {
+  const {token} = useContext(AuthContext)
+
   const dateRef = createRef();
   const timeRef = createRef();
   const marqueeRef = createRef();
@@ -50,27 +53,50 @@ const Meeting = () => {
   const [loading, setLoading] = useState(true);
   const [meeting, setMeeting] = useState([]);
   const [date, setDate] = useState("today");
-  const [token, setToken] = useState("");
-
-  
 
   useEffect(() => {
-    dateTimeUpdate();
-  }, [input])  
-  useEffect(async () => {
-    await fetchMeeting(date);
-    let intervalFetch = setInterval(async () => {
-      await fetchMeeting(date);
-    }, 6000);
-    return () => {
-      clearInterval(intervalFetch);
+    const dateTimeUpdate = () => {
+      return setInterval(() => {
+        const current = new Date();
+        const timeArray = current
+          .toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          })
+          .split(" ");
+        let date = ("0" + current.getDate())
+          .slice(-2)
+          .replace(/[0123456789]/g, (value) => {
+            return mapNumber[value];
+          });
+        let day = khmerDay[current.getDay()];
+        let month = khmerMonth[current.getMonth()];
+        let year = current
+          .getFullYear()
+          .toString()
+          .replace(/[0123456789]/g, (value) => {
+            return mapNumber[value];
+          });
+        let time = timeArray[0].replace(/[0123456789]/g, (value) => {
+          return mapNumber[value];
+        });
+
+        if (dateRef.current && timeRef.current) {
+          dateRef.current.textContent = `ថ្ងៃ${day} ទី${date}​ ខែ${month} ឆ្នាំ${year}`;
+          timeRef.current.textContent = time;
+        }
+      }, 1000);
     };
-  }, [meeting, date]);
-  const fetchMeeting = async (endDate) => {
+    // start timer
+    const timeInterval = dateTimeUpdate();
+    return () => {
+      clearInterval(timeInterval);
+    };
+  }, [dateRef, timeRef]);
+
+  const fetchMeeting = useCallback(async (endDate) => {
     const now = new Date();
-    if (!token) {
-      token = await api.getUserToken();
-    }
     let endDateMeeting;
     if (endDate === "today") {
       endDateMeeting = new Date(
@@ -88,17 +114,15 @@ const Meeting = () => {
     } else if (endDate === "month") {
       endDateMeeting = new Date(now.getFullYear(), now.getMonth() + 1);
     }
-    let meeting = await api.fetchMeeting(
+    let resMeetings = await API.fetchMeeting(
       token,
       new Date(endDateMeeting.getTime() + 1000 * 60 * 60 * 7).toISOString()
     );
-    meeting = meeting?.filter(
+    resMeetings = resMeetings?.filter(
       (meeting) => new Date(meeting.acf.end_date_time).getTime() > Date.now()
     );
-    if (JSON.stringify(meeting) !== JSON.stringify(meeting)) {
-      setMeeting(()=>{
-
-      });
+    if (JSON.stringify(meeting) !== JSON.stringify(resMeetings)) {
+      setMeeting(resMeetings);
       setState(
         {
           meeting,
@@ -114,120 +138,79 @@ const Meeting = () => {
         loading: false,
       });
     }
-  };
+  }, []);
 
-  const animationMeeting = () => {
-    if (meetingRef.current?.children.length > 5) {
-      intervalMeeting = setInterval(() => {
+  useEffect(() => {
+    let intervalFetch;
+    (async () => {
+      setLoading(true)
+      await fetchMeeting(date).catch(err=>alert(err));
+      setLoading(false);
+      intervalFetch = setInterval(async () => {
+        await fetchMeeting(date);
+      }, 6000);
+    })();
+    return () => {
+      clearInterval(intervalFetch);
+    };
+  }, [date, fetchMeeting]);
+
+  useEffect(() => {
+    let intervalMeeting;
+    const animationMeeting = () => {
+      if (meetingRef.current?.children.length > 5) {
+        intervalMeeting = setInterval(() => {
+          let firstElement = meetingRef.current.firstElementChild;
+          meetingRef.current.children[1].classList.add("animatedDiv");
+          meetingRef.current.firstElementChild.remove();
+          if (firstElement.classList.contains("animatedDiv")) {
+            firstElement.className = "meeting";
+          }
+          meetingRef.current.insertAdjacentElement("beforeend", firstElement);
+        }, 12000);
+      } else {
         let firstElement = meetingRef.current.firstElementChild;
-        meetingRef.current.children[1].classList.add("animatedDiv");
-        meetingRef.current.firstElementChild.remove();
-        if (firstElement.classList.contains("animatedDiv")) {
-          firstElement.className = "meeting";
+        if (firstElement) {
+          firstElement.classList.remove("animatedDiv");
+          firstElement.style.marginTop = "0px";
         }
-        meetingRef.current.insertAdjacentElement(
-          "beforeend",
-          firstElement
-        );
-      }, 12000);
-    } else {
-      let firstElement = meetingRef.current.firstElementChild;
-      if (firstElement) {
-        firstElement.classList.remove("animatedDiv");
-        firstElement.style.marginTop = "0px";
       }
-    }
-  };
-  const dateTimeUpdate = () => {
-    setInterval(() => {
-      const current = new Date();
-      const timeArray = current
-        .toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-        })
-        .split(" ");
-      let date = ("0" + current.getDate())
-        .slice(-2)
-        .replace(/[0123456789]/g, (value) => {
-          return mapNumber[value];
-        });
-      let day = khmerDay[current.getDay()];
-      let month = khmerMonth[current.getMonth()];
-      let year = current
-        .getFullYear()
-        .toString()
-        .replace(/[0123456789]/g, (value) => {
-          return mapNumber[value];
-        });
-      let time = timeArray[0].replace(/[0123456789]/g, (value) => {
-        return mapNumber[value];
-      });
-
-      if (dateRef.current && timeRef.current) {
-        dateRef.current.textContent = `ថ្ងៃ${day} ទី${date}​ ខែ${month} ឆ្នាំ${year}`;
-        timeRef.current.textContent = time;
-      }
-    }, 500);
-  };
-  const toggleFullScreen = () => {
-    var element = document.body;
-
-    var isFullscreen =
-      document.webkitIsFullScreen || document.mozFullScreen || false;
-
-    element.requestFullScreen =
-      element.requestFullScreen ||
-      element.webkitRequestFullScreen ||
-      element.mozRequestFullScreen ||
-      function () {
-        return false;
-      };
-    document.cancelFullScreen =
-      document.cancelFullScreen ||
-      document.webkitCancelFullScreen ||
-      document.mozCancelFullScreen ||
-      function () {
-        return false;
-      };
-
-    isFullscreen ? document.cancelFullScreen() : element.requestFullScreen();
-  };
+    };
+    animationMeeting();
+    return () => {
+      clearInterval(intervalMeeting);
+    };
+  }, [meeting, meetingRef]);
 
   const meetingRender = meeting?.map((m, i) => {
-    let firstClass;
-    if (i === 0) firstClass = "meeting animatedDiv";
-    else firstClass = "meeting";
-
-    var start = new Date(m.date);
-    var timeArray = start
+    let firstClass = i === 0 ? "meeting animatedDiv" : "meeting";
+    const start = new Date(m.date);
+    const timeArray = start
       .toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
         hour12: true,
       })
       .split(" ");
-    var day = ("0" + start.getDate())
+    const day = ("0" + start.getDate())
       .slice(-2)
       .replace(/[0123456789]/g, (value) => {
         return mapNumber[value];
       });
-    var month = khmerMonth[start.getMonth()];
-    var year = start
+    const month = khmerMonth[start.getMonth()];
+    const year = start
       .getFullYear()
       .toString()
       .replace(/[0123456789]/g, (value) => {
         return mapNumber[value];
       });
-    var time =
+    const time =
       timeArray[0].replace(/[0123456789]/g, (value) => {
         return mapNumber[value];
       }) +
       " " +
       (timeArray[1] === "AM" ? "ព្រឹក" : "ល្ងាច");
-
-    let mObj = (
+    return (
       <div className={firstClass} key={i}>
         {/* Date Time */}
         <div className="datetime">
@@ -280,20 +263,16 @@ const Meeting = () => {
         </div>
       </div>
     );
-    return mObj;
   });
 
-  const marqueeRender = meeting?.map((m, i) => {
-    let mObj = (
-      <p key={i}>
-        {(i + 1).toString().replace(/[0123456789]/g, (value) => {
-          return mapNumber[value];
-        })}
-        / {m.title.rendered}
-      </p>
-    );
-    return mObj;
-  });
+  const marqueeRender = meeting?.map((m, i) => (
+    <p key={i}>
+      {(i + 1).toString().replace(/[0123456789]/g, (value) => {
+        return mapNumber[value];
+      })}
+      / {m.title.rendered}
+    </p>
+  ));
 
   return (
     <div className="App">
@@ -340,17 +319,9 @@ const Meeting = () => {
           <span
             style={{ fontFamily: "Dangrek" }}
             onClick={() => {
-              clearInterval(intervalMeeting);
-              setState(
-                {
-                  date: "today",
-                  loading: true,
-                  meeting: null,
-                },
-                () => {
-                  fetchMeeting(date);
-                }
-              );
+              setDate("today");
+              setLoading(true);
+              setMeeting([]);
             }}
           >
             ថ្ងៃនេះ
@@ -379,7 +350,6 @@ const Meeting = () => {
               setMeeting([]);
               setloading(false);
               setState(
-
                 {
                   loading: true,
                   date: "month",
@@ -397,7 +367,33 @@ const Meeting = () => {
           <div className="navigation">
             <div className="left">
               <i
-                onClick={toggleFullscreen}
+                onClick={() => {
+                  const element = document.body;
+
+                  const isFullscreen =
+                    document.webkitIsFullScreen ||
+                    document.mozFullScreen ||
+                    false;
+
+                  element.requestFullScreen =
+                    element.requestFullScreen ||
+                    element.webkitRequestFullScreen ||
+                    element.mozRequestFullScreen ||
+                    function () {
+                      return false;
+                    };
+                  document.cancelFullScreen =
+                    document.cancelFullScreen ||
+                    document.webkitCancelFullScreen ||
+                    document.mozCancelFullScreen ||
+                    function () {
+                      return false;
+                    };
+
+                  isFullscreen
+                    ? document.cancelFullScreen()
+                    : element.requestFullScreen();
+                }}
                 className="fa fa-arrows-alt fullscreen d-lg-inline d-none"
                 aria-hidden="true"
                 style={{
@@ -423,17 +419,11 @@ const Meeting = () => {
             </Link>
             <h3>
               សរុបកិច្ចប្រជុំ
-              {date === "today"
-                ? "ថ្ងៃ"
-                : date === "week"
-                ? "សប្តាហ៍"
-                : "ខែ"}
+              {date === "today" ? "ថ្ងៃ" : date === "week" ? "សប្តាហ៍" : "ខែ"}
               នេះ មានចំនួន{" "}
-              {meeting?.length
-                .toString()
-                .replace(/[0123456789]/g, (value) => {
-                  return mapNumber[value];
-                })}{" "}
+              {meeting?.length.toString().replace(/[0123456789]/g, (value) => {
+                return mapNumber[value];
+              })}{" "}
               កិច្ចប្រជុំ
             </h3>
           </div>

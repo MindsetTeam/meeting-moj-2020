@@ -1,25 +1,27 @@
 export default {
   async getUserToken() {
-    const result = await fetch(
-      // "http://demo.mcs.gov.kh/wp-json/jwt-auth/v1/token",
-      "http://localhost/moj-meeting/wp-json/jwt-auth/v1/token",
+    return fetch(
+      // "http://demo.mcs.gov.kh/moj-meeting/wp-json/jwt-auth/v1/token",
+      `${process.env.REACT_APP_HOST_URL}/wp-json/jwt-auth/v1/token`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username: 'srun',
-          password: 123,
-          // username: process.env.REACT_APP_USERNAME,
-          // password: process.env.REACT_APP_PASSWORD,
+          username: process.env.REACT_APP_USERNAME_TEST,
+          password: process.env.REACT_APP_PASSWORD,
         }),
       }
-    ).then((res) => res.json());
-    return result.token;
+    ).then((res) => {
+      if (!res.ok) {
+        throw new Error(`${res.statusText} `);
+      }
+      return res.json();
+    });
   },
   async getFirstYear() {
     let url =
       "http://localhost/moj-meeting/wp-json/wp/v2/posts?_fields=date&orderby=date&order=asc&status=publish&per_page=1";
-    const data=  await fetch(url).then((res) => res.json());
+    const data = await fetch(url).then((res) => res.json());
     return new Date(data[0].date).getFullYear();
   },
   async fetchMeeting(token, endDateISO, startDateISO, limit) {

@@ -77,7 +77,8 @@ export class Meeting extends React.Component {
   async fetchMeeting(endDate) {
     const now = new Date();
     if (!this.token) {
-      this.token = await api.getUserToken();
+       const {token}= await api.getUserToken();
+       this.token = token
     }
     let endDateMeeting;
     if (endDate === "today") {
