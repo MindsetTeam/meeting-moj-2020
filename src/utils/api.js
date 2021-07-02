@@ -62,7 +62,6 @@ export default {
       }
       returnMeetings.push(...fetchedMeeting);
     }
-    console.log(returnMeetings);
     return returnMeetings;
   },
 };

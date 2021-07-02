@@ -27,11 +27,11 @@ const App = () => {
       <AuthContext.Provider value={{ token }}>
         <Suspense fallback={<h1>Loading....</h1>}>
           <Switch>
-            {/* <Route path="/" exact>
-              <Meeting />
-            </Route> */}
             <Route path="/" exact>
               <MeetingV2 />
+            </Route>
+            <Route path="/v1" exact>
+              <Meeting />
             </Route>
             <Route path="/meetings">
               <MeetingAll />

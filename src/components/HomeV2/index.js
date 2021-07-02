@@ -101,58 +101,55 @@ const Meeting = () => {
     };
   }, [dateRef, timeRef]);
 
-  const fetchMeeting = useCallback(
-    async (endDate) => {
-      const now = new Date();
-      let endDateMeeting;
-      if (endDate === "today") {
-        endDateMeeting = new Date(
-          now.getFullYear(),
-          now.getMonth(),
-          now.getDate() + 1
-        );
-      } else if (endDate === "week") {
-        const dayToWeekend = 7 - now.getDay();
-        endDateMeeting = new Date(
-          now.getFullYear(),
-          now.getMonth(),
-          now.getDate() + dayToWeekend
-        );
-      } else if (endDate === "month") {
-        endDateMeeting = new Date(now.getFullYear(), now.getMonth() + 1);
-      }
-      let resMeetings = await API.fetchMeeting(
-        token,
-        new Date(endDateMeeting.getTime() + 1000 * 60 * 60 * 7).toISOString()
+  const fetchMeeting = async (endDate, oldMeetingsData=[]) => {
+    const now = new Date();
+    let endDateMeeting;
+    if (endDate === "today") {
+      endDateMeeting = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + 1
       );
-      resMeetings = resMeetings?.filter(
-        (meeting) => new Date(meeting.acf.end_date_time).getTime() > Date.now()
+    } else if (endDate === "week") {
+      const dayToWeekend = 7 - now.getDay();
+      endDateMeeting = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + dayToWeekend
       );
-      if (JSON.stringify(meeting) !== JSON.stringify(resMeetings)) {
-        setMeeting(resMeetings);
-      }
-    },
-    [token]
-  );
+    } else if (endDate === "month") {
+      endDateMeeting = new Date(now.getFullYear(), now.getMonth() + 1);
+    }
+    let resMeetings = await API.fetchMeeting(
+      token,
+      new Date(endDateMeeting.getTime() + 1000 * 60 * 60 * 7).toISOString()
+    );
+    resMeetings = resMeetings?.filter(
+      (meeting) => new Date(meeting.acf.end_date_time).getTime() > Date.now()
+    );
+    if (JSON.stringify(resMeetings) !== JSON.stringify(oldMeetingsData)) {
+      setMeeting(resMeetings);
+    }
+  };
 
   useEffect(() => {
-    console.log("object");
-    let intervalFetch;
+    // let intervalFetch;
     (async () => {
       setMeeting([]);
       setLoading(true);
       await fetchMeeting(date).catch((err) => console.log(err));
       setLoading(false);
-      intervalFetch = setInterval(async () => {
-        await fetchMeeting(date);
-      }, 6000);
+      // intervalFetch = setInterval(async () => {
+      //   await fetchMeeting(date);
+      // }, 6000);
     })();
     return () => {
-      clearInterval(intervalFetch);
+      // clearInterval(intervalFetch);
     };
-  }, [date, fetchMeeting]);
+  }, [date]);
 
   useEffect(() => {
+    let intervalFetch;
     let intervalMeeting;
     const animationMeeting = () => {
       if (meetingRef.current?.children.length > 5) {
@@ -174,8 +171,12 @@ const Meeting = () => {
       }
     };
     animationMeeting();
+    intervalFetch = setInterval(async () => {
+      await fetchMeeting(date, meeting);
+    }, 6000);
     return () => {
       clearInterval(intervalMeeting);
+      clearInterval(intervalFetch);
     };
   }, [meeting, meetingRef]);
 
