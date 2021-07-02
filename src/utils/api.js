@@ -1,13 +1,12 @@
 export default {
   async getUserToken() {
     return fetch(
-      // "http://demo.mcs.gov.kh/moj-meeting/wp-json/jwt-auth/v1/token",
       `${process.env.REACT_APP_HOST_URL}/wp-json/jwt-auth/v1/token`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username: process.env.REACT_APP_USERNAME_TEST,
+          username: process.env.REACT_APP_USERNAME,
           password: process.env.REACT_APP_PASSWORD,
         }),
       }
@@ -19,17 +18,11 @@ export default {
     });
   },
   async getFirstYear() {
-    let url =
-      "http://localhost/moj-meeting/wp-json/wp/v2/posts?_fields=date&orderby=date&order=asc&status=publish&per_page=1";
+    let url = `${process.env.REACT_APP_HOST_URL}/wp-json/wp/v2/posts?_fields=date&orderby=date&order=asc&status=publish&per_page=1`;
     const data = await fetch(url).then((res) => res.json());
     return new Date(data[0].date).getFullYear();
   },
   async fetchMeeting(token, endDateISO, startDateISO, limit) {
-    // let startDate =
-    //   startDateISO ||
-    //   new Date(
-    //     new Date(new Date().toLocaleDateString()).getTime() + 60 * 7 * 60 * 1000
-    //   ).toISOString();
     let startDate =
       startDateISO ||
       new Date(
@@ -39,7 +32,7 @@ export default {
     let returnMeetings = [];
     if (token) {
       let url =
-        "http://localhost/moj-meeting/wp-json/wp/v2/posts?_fields=date,acf,title&orderby=date&order=asc&status=publish,future&per_page=" +
+        `${process.env.REACT_APP_HOST_URL}/wp-json/wp/v2/posts?_fields=date,acf,title&orderby=date&order=asc&status=publish,future&per_page=` +
         (limit || 100);
       url += "&after=" + startDate;
       if (endDateISO) {

@@ -1,4 +1,10 @@
-import React, { createRef, useEffect, useState, useCallback, useContext } from "react";
+import React, {
+  createRef,
+  useEffect,
+  useState,
+  useCallback,
+  useContext,
+} from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../../App";
 import logo from "../../asset/logo.png";
@@ -44,7 +50,7 @@ const khmerDay = [
 ];
 
 const Meeting = () => {
-  const {token} = useContext(AuthContext)
+  const { token } = useContext(AuthContext);
 
   const dateRef = createRef();
   const timeRef = createRef();
@@ -95,56 +101,47 @@ const Meeting = () => {
     };
   }, [dateRef, timeRef]);
 
-  const fetchMeeting = useCallback(async (endDate) => {
-    const now = new Date();
-    let endDateMeeting;
-    if (endDate === "today") {
-      endDateMeeting = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate() + 1
+  const fetchMeeting = useCallback(
+    async (endDate) => {
+      const now = new Date();
+      let endDateMeeting;
+      if (endDate === "today") {
+        endDateMeeting = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate() + 1
+        );
+      } else if (endDate === "week") {
+        const dayToWeekend = 7 - now.getDay();
+        endDateMeeting = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate() + dayToWeekend
+        );
+      } else if (endDate === "month") {
+        endDateMeeting = new Date(now.getFullYear(), now.getMonth() + 1);
+      }
+      let resMeetings = await API.fetchMeeting(
+        token,
+        new Date(endDateMeeting.getTime() + 1000 * 60 * 60 * 7).toISOString()
       );
-    } else if (endDate === "week") {
-      const dayToWeekend = 7 - now.getDay();
-      endDateMeeting = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate() + dayToWeekend
+      resMeetings = resMeetings?.filter(
+        (meeting) => new Date(meeting.acf.end_date_time).getTime() > Date.now()
       );
-    } else if (endDate === "month") {
-      endDateMeeting = new Date(now.getFullYear(), now.getMonth() + 1);
-    }
-    let resMeetings = await API.fetchMeeting(
-      token,
-      new Date(endDateMeeting.getTime() + 1000 * 60 * 60 * 7).toISOString()
-    );
-    resMeetings = resMeetings?.filter(
-      (meeting) => new Date(meeting.acf.end_date_time).getTime() > Date.now()
-    );
-    if (JSON.stringify(meeting) !== JSON.stringify(resMeetings)) {
-      setMeeting(resMeetings);
-      setState(
-        {
-          meeting,
-          loading: false,
-        },
-        () => {
-          //  clearInterval(intervalMeeting);
-          animationMeeting();
-        }
-      );
-    } else {
-      setState({
-        loading: false,
-      });
-    }
-  }, []);
+      if (JSON.stringify(meeting) !== JSON.stringify(resMeetings)) {
+        setMeeting(resMeetings);
+      }
+    },
+    [token]
+  );
 
   useEffect(() => {
+    console.log("object");
     let intervalFetch;
     (async () => {
-      setLoading(true)
-      await fetchMeeting(date).catch(err=>alert(err));
+      setMeeting([]);
+      setLoading(true);
+      await fetchMeeting(date).catch((err) => console.log(err));
       setLoading(false);
       intervalFetch = setInterval(async () => {
         await fetchMeeting(date);
@@ -320,8 +317,8 @@ const Meeting = () => {
             style={{ fontFamily: "Dangrek" }}
             onClick={() => {
               setDate("today");
-              setLoading(true);
-              setMeeting([]);
+              // setLoading(true);
+              // setMeeting([]);
             }}
           >
             ថ្ងៃនេះ
@@ -329,17 +326,7 @@ const Meeting = () => {
           <span
             style={{ fontFamily: "Dangrek" }}
             onClick={() => {
-              clearInterval(intervalMeeting);
-              setState(
-                {
-                  date: "week",
-                  loading: true,
-                  meeting: null,
-                },
-                () => {
-                  fetchMeeting(date);
-                }
-              );
+              setDate("week");
             }}
           >
             សប្ដាហ៌
@@ -347,18 +334,7 @@ const Meeting = () => {
           <span
             style={{ fontFamily: "Dangrek" }}
             onClick={() => {
-              setMeeting([]);
-              setloading(false);
-              setState(
-                {
-                  loading: true,
-                  date: "month",
-                  meeting: null,
-                },
-                () => {
-                  fetchMeeting(date);
-                }
-              );
+              setDate("month");
             }}
           >
             ខែនេះ
@@ -409,7 +385,7 @@ const Meeting = () => {
         {/* Marquee */}
         <div className="marquee">
           <div className="marquee-caption">
-            <Link to="allMeeting">
+            <Link to="/meetings">
               {" "}
               <img
                 src={logo}

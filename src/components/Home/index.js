@@ -428,7 +428,7 @@ export class Meeting extends React.Component {
           {/* Marquee */}
           <div className="marquee">
             <div className="marquee-caption">
-              <Link to="allMeeting">
+              <Link to="/meetings">
                 {" "}
                 <img
                   src={logo}
